@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "A roadmap task for the project",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique task ID" },
+        "phase": { "type": "integer", "description": "Phase number (0-4)" },
+        "title": { "type": "string", "description": "Task title" },
+        "date_label": { "type": "string", "description": "Timeline label (e.g. Dia 1)" },
+        "detail": { "type": "string", "description": "Detailed description" },
+        "type": { "type": "string", "description": "Task type (crit, dev, manual, auto, store)" },
+        "tool": { "type": "string", "description": "Tool or cost info" },
+        "completed": { "type": "boolean", "description": "Completion status" },
+        "assignee": { "type": "string", "description": "Assigned user (Paula, Pablo, etc.)" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["id", "phase", "title", "completed"]
+    },
+    "Gasto": {
+      "title": "Gasto",
+      "description": "An expense record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique expense ID" },
+        "concept": { "type": "string", "description": "Expense description" },
+        "amount": { "type": "number", "description": "Amount in Euros" },
+        "category": { "type": "string", "description": "Expense category (infra, marketing, legal, tools, dev, otros)" },
+        "type": { "type": "string", "description": "Expense type (unico, mensual, anual)" },
+        "date": { "type": "string", "format": "date", "description": "Expense date" },
+        "payer": { "type": "string", "description": "Who paid (Paula, Pablo)" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["id", "concept", "amount", "date", "payer"]
+    },
+    "MRRSnapshot": {
+      "title": "MRRSnapshot",
+      "description": "Historical MRR data point",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique snapshot ID" },
+        "mrr": { "type": "number", "description": "Monthly Recurring Revenue" },
+        "subscribers": { "type": "integer", "description": "Number of subscribers" },
+        "date": { "type": "string", "format": "date", "description": "Snapshot date" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["id", "mrr", "subscribers", "date"]
+    },
+    "Config": {
+      "title": "Config",
+      "description": "Global application configuration",
+      "type": "object",
+      "properties": {
+        "launch_date": { "type": "string", "format": "date", "description": "Project launch date" },
+        "mrr": { "type": "number", "description": "Current MRR" },
+        "subscribers": { "type": "integer", "description": "Current subscriber count" },
+        "valuation_multiplier": { "type": "number", "description": "Valuation multiplier" },
+        "updated_at": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      }
+    }
+  },
+  "firestore": {
+    "/tasks": {
+      "schema": "Task",
+      "description": "Collection of tasks"
+    },
+    "/gastos": {
+      "schema": "Gasto",
+      "description": "Collection of expenses"
+    },
+    "/mrr_snapshots": {
+      "schema": "MRRSnapshot",
+      "description": "Collection of MRR snapshots"
+    },
+    "/config": {
+      "schema": "Config",
+      "description": "Singleton configuration document"
+    }
+  }
+}

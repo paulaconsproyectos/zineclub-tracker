@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "paulacons.proyectos@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidTask(data) {
+      return data.id is string &&
+             data.phase is int &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 500 &&
+             data.completed is bool &&
+             (data.type is string || !('type' in data)) &&
+             (data.tool is string || !('tool' in data)) &&
+             (data.assignee is string || data.assignee == null || !('assignee' in data));
+    }
+
+    function isValidGasto(data) {
+      return data.id is string &&
+             data.concept is string && data.concept.size() > 0 && data.concept.size() < 500 &&
+             data.amount is number &&
+             data.date is string &&
+             data.payer is string &&
+             (data.category is string || !('category' in data)) &&
+             (data.type is string || !('type' in data));
+    }
+
+    function isValidMRR(data) {
+      return data.id is string &&
+             data.mrr is number &&
+             data.subscribers is int &&
+             data.date is string;
+    }
+
+    function isValidConfig(data) {
+      return (data.launch_date is string || !('launch_date' in data)) &&
+             (data.mrr is number || !('mrr' in data)) &&
+             (data.subscribers is int || !('subscribers' in data)) &&
+             (data.valuation_multiplier is number || !('valuation_multiplier' in data));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /tasks/{taskId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidTask(request.resource.data);
+      allow delete: if isAuthenticated();
+    }
+
+    match /gastos/{gastoId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidGasto(request.resource.data);
+      allow delete: if isAuthenticated();
+    }
+
+    match /mrr_snapshots/{snapshotId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidMRR(request.resource.data);
+      allow delete: if isAuthenticated();
+    }
+
+    match /config/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidConfig(request.resource.data);
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+  }
+}
